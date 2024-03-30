@@ -17,8 +17,8 @@ public class MainWindow extends JFrame {
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER); // Center align the text
 
         // Buttons to open different views
-        JButton openJobViewButton = new JButton("Open Customer View");
-        openJobViewButton.addActionListener(new ActionListener() {
+        JButton openCustomerViewButton = new JButton("Open Customer View");
+        openCustomerViewButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 CustomerView customerView = new CustomerView(); // Open Job View
@@ -54,7 +54,7 @@ public class MainWindow extends JFrame {
         panel.setLayout(new BorderLayout()); // Use BorderLayout for positioning
         panel.add(titleLabel, BorderLayout.NORTH); // Add the title label at the top
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER)); // Panel to hold buttons
-        buttonPanel.add(openJobViewButton);
+        buttonPanel.add(openCustomerViewButton);
 //        buttonPanel.add(openEmployeeViewButton);
 //        buttonPanel.add(openProjectViewButton);
         panel.add(buttonPanel, BorderLayout.CENTER); // Add the buttons below the title

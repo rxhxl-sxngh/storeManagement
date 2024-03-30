@@ -4,14 +4,14 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 public class DataAccess {
-    static final String DB_URL = "jdbc:mysql://localhost:3306/company";
+    static final String DB_URL = "jdbc:mysql://localhost:3306/store";
     static final String USER = "root";
     static final String PASS = "Soco2003user#";
 
     // Add a customer to the database
     public static void addCustomer(Customer customer) {
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
-            String sql = "INSERT INTO Customer (customerID, customerName, email) VALUES (?, ?, ?)";
+            String sql = "INSERT INTO Customers (customerID, customerName, email) VALUES (?, ?, ?)";
             try (PreparedStatement preparedStatement = conn.prepareStatement(sql)) {
                 preparedStatement.setInt(1, customer.getCustomerID());
                 preparedStatement.setString(2, customer.getCustomerName());
@@ -46,6 +46,29 @@ public class DataAccess {
             System.out.println("Failed to get customer.");
         }
         return customer;
+    }
+
+    // Get all customers from the database
+    public static List<Customer> getAllCustomers() {
+        List<Customer> customers = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            String sql = "SELECT * FROM customers";
+            try (PreparedStatement preparedStatement = conn.prepareStatement(sql)) {
+                ResultSet resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()) {
+                    Customer customer = new Customer(
+                            resultSet.getInt("customerID"),
+                            resultSet.getString("customerName"),
+                            resultSet.getString("email")
+                    );
+                    customers.add(customer);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to get all customers.");
+        }
+        return customers;
     }
 
     // Update a customer in the database
