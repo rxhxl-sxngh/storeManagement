@@ -26,14 +26,14 @@ public class MainWindow extends JFrame {
             }
         });
 
-//        JButton openEmployeeViewButton = new JButton("Open Employee View");
-//        openEmployeeViewButton.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                EmployeeView employeeView = new EmployeeView(); // Open Employee View
-//                employeeView.setVisible(true);
-//            }
-//        });
+        JButton openSupplierViewButton = new JButton("Open Supplier View");
+        openSupplierViewButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                SupplierView supplierView = new SupplierView(); // Open Employee View
+                supplierView.setVisible(true);
+            }
+        });
 //
 //        JButton openProjectViewButton = new JButton("Open Project View");
 //        openProjectViewButton.addActionListener(new ActionListener() {
@@ -55,7 +55,7 @@ public class MainWindow extends JFrame {
         panel.add(titleLabel, BorderLayout.NORTH); // Add the title label at the top
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER)); // Panel to hold buttons
         buttonPanel.add(openCustomerViewButton);
-//        buttonPanel.add(openEmployeeViewButton);
+        buttonPanel.add(openSupplierViewButton);
 //        buttonPanel.add(openProjectViewButton);
         panel.add(buttonPanel, BorderLayout.CENTER); // Add the buttons below the title
 

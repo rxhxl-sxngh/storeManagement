@@ -26,7 +26,7 @@ public class DataAccess {
     }
 
     // Read a customer from the database by customerID
-    public static Customer getCustomer(int customerID) {
+    public static Customer getCustomerByID(int customerID) {
         Customer customer = null;
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
             String sql = "SELECT * FROM customers WHERE customerID = ?";
@@ -100,6 +100,101 @@ public class DataAccess {
         } catch (SQLException e) {
             e.printStackTrace();
             System.out.println("Failed to delete customer.");
+        }
+    }
+
+    // Add a supplier to the database
+    public static void addSupplier(Supplier supplier) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            String sql = "INSERT INTO suppliers (supplierID, supplierName, contactPhone) VALUES (?, ?, ?)";
+            try (PreparedStatement preparedStatement = conn.prepareStatement(sql)) {
+                preparedStatement.setInt(1, supplier.getSupplierID());
+                preparedStatement.setString(2, supplier.getSupplierName());
+                preparedStatement.setString(3, supplier.getContactPhone());
+                preparedStatement.executeUpdate();
+                System.out.println("Supplier added successfully.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to add supplier.");
+        }
+    }
+
+    // Get a supplier from the database by supplierID
+    public static Supplier getSupplierByID(int supplierID) {
+        Supplier supplier = null;
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            String sql = "SELECT * FROM suppliers WHERE supplierID = ?";
+            try (PreparedStatement preparedStatement = conn.prepareStatement(sql)) {
+                preparedStatement.setInt(1, supplierID);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    supplier = new Supplier(
+                            resultSet.getInt("supplierID"),
+                            resultSet.getString("supplierName"),
+                            resultSet.getString("contactPhone")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to get supplier.");
+        }
+        return supplier;
+    }
+
+    // Get all suppliers from the database
+    public static List<Supplier> getAllSuppliers() {
+        List<Supplier> suppliers = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            String sql = "SELECT * FROM suppliers";
+            try (PreparedStatement preparedStatement = conn.prepareStatement(sql)) {
+                ResultSet resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()) {
+                    Supplier supplier = new Supplier(
+                            resultSet.getInt("supplierID"),
+                            resultSet.getString("supplierName"),
+                            resultSet.getString("contactPhone")
+                    );
+                    suppliers.add(supplier);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to get all suppliers.");
+        }
+        return suppliers;
+    }
+
+    // Update a supplier in the database
+    public static void updateSupplier(Supplier supplier) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            String sql = "UPDATE suppliers SET supplierName = ?, contactPhone = ? WHERE supplierID = ?";
+            try (PreparedStatement preparedStatement = conn.prepareStatement(sql)) {
+                preparedStatement.setString(1, supplier.getSupplierName());
+                preparedStatement.setString(2, supplier.getContactPhone());
+                preparedStatement.setInt(3, supplier.getSupplierID());
+                preparedStatement.executeUpdate();
+                System.out.println("Supplier updated successfully.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to update supplier.");
+        }
+    }
+
+    // Delete a supplier from the database by supplierID
+    public static void deleteSupplier(int supplierID) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            String sql = "DELETE FROM suppliers WHERE supplierID = ?";
+            try (PreparedStatement preparedStatement = conn.prepareStatement(sql)) {
+                preparedStatement.setInt(1, supplierID);
+                preparedStatement.executeUpdate();
+                System.out.println("Supplier deleted successfully.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to delete supplier.");
         }
     }
 
