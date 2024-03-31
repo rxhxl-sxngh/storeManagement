@@ -21,7 +21,7 @@ public class MainWindow extends JFrame {
         openCustomerViewButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                CustomerView customerView = new CustomerView(); // Open Job View
+                CustomerView customerView = new CustomerView(); // Open Customer View
                 customerView.setVisible(true);
             }
         });
@@ -30,7 +30,7 @@ public class MainWindow extends JFrame {
         openSupplierViewButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                SupplierView supplierView = new SupplierView(); // Open Employee View
+                SupplierView supplierView = new SupplierView(); // Open Supplier View
                 supplierView.setVisible(true);
             }
         });
@@ -39,7 +39,7 @@ public class MainWindow extends JFrame {
         openProductViewButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ProductView productView = new ProductView(); // Open Employee View
+                ProductView productView = new ProductView(); // Open Product View
                 productView.setVisible(true);
             }
         });
@@ -48,8 +48,17 @@ public class MainWindow extends JFrame {
         openPaymentViewButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                PaymentView paymentView = new PaymentView(); // Open Employee View
+                PaymentView paymentView = new PaymentView(); // Open Payment View
                 paymentView.setVisible(true);
+            }
+        });
+
+        JButton openOrderViewButton = new JButton("Open Order View");
+        openOrderViewButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                OrderView orderView = new OrderView(); // Open Order View
+                orderView.setVisible(true);
             }
         });
 //
@@ -76,6 +85,7 @@ public class MainWindow extends JFrame {
         buttonPanel.add(openSupplierViewButton);
         buttonPanel.add(openProductViewButton);
         buttonPanel.add(openPaymentViewButton);
+        buttonPanel.add(openOrderViewButton);
 //        buttonPanel.add(openProjectViewButton);
         panel.add(buttonPanel, BorderLayout.CENTER); // Add the buttons below the title
 

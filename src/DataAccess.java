@@ -3,6 +3,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.time.LocalDateTime;
+
 public class DataAccess {
     static final String DB_URL = "jdbc:mysql://localhost:3306/store";
     static final String USER = "root";
@@ -402,6 +404,176 @@ public class DataAccess {
             e.printStackTrace();
             System.out.println("Failed to delete payment.");
         }
+    }
+
+    // Order SQL queries
+    private static final String INSERT_ORDER_QUERY = "INSERT INTO orders (customerID, timestamp, total, paymentID) VALUES (?, ?, ?, ?)";
+    private static final String INSERT_ORDER_PRODUCT_QUERY = "INSERT INTO orderproducts (orderID, productID, quantity) VALUES (?, ?, ?)";
+    private static final String SELECT_ORDER_BY_ID_QUERY = "SELECT * FROM orders WHERE orderID = ?";
+    private static final String SELECT_ALL_ORDERS_QUERY = "SELECT * FROM orders";
+    private static final String UPDATE_ORDER_QUERY = "UPDATE orders SET customerID = ?, timestamp = ?, total = ?, paymentID = ? WHERE orderID = ?";
+    private static final String DELETE_ORDER_QUERY = "DELETE FROM orders WHERE orderID = ?";
+    private static final String DELETE_ORDER_PRODUCTS_QUERY = "DELETE FROM orderproducts WHERE orderID = ?";
+
+    // Function to add an order to the database
+    public static void addOrder(Order order) {
+        try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            // Insert order details
+            PreparedStatement statement = connection.prepareStatement(INSERT_ORDER_QUERY, Statement.RETURN_GENERATED_KEYS);
+            statement.setInt(1, order.getCustomerID());
+            statement.setTimestamp(2, Timestamp.valueOf(order.getTimestamp()));
+            statement.setDouble(3, order.getTotal());
+            statement.setInt(4, order.getPaymentID());
+            statement.executeUpdate();
+            ResultSet generatedKeys = statement.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                int orderId = generatedKeys.getInt(1);
+                order.setOrderID(orderId);
+                // Insert order products
+                insertOrderProducts(connection, order);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Function to insert order products into the database
+    private static void insertOrderProducts(Connection connection, Order order) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement(INSERT_ORDER_PRODUCT_QUERY);
+        for (Map.Entry<Integer, Integer> entry : order.getProducts().entrySet()) {
+            statement.setInt(1, order.getOrderID());
+            statement.setInt(2, entry.getKey());
+            statement.setInt(3, entry.getValue());
+            statement.addBatch();
+        }
+        statement.executeBatch();
+    }
+
+    // Function to retrieve an order by its ID from the database
+    public static Order getOrderByID(int orderID) {
+        try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS);
+             PreparedStatement statement = connection.prepareStatement(SELECT_ORDER_BY_ID_QUERY)) {
+            statement.setInt(1, orderID);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return mapResultSetToOrder(resultSet);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Function to retrieve all orders from the database
+    public static Map<Integer, Order> getAllOrders() {
+        Map<Integer, Order> orders = new HashMap<>();
+        try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS);
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(SELECT_ALL_ORDERS_QUERY)) {
+            while (resultSet.next()) {
+                Order order = mapResultSetToOrder(resultSet);
+                orders.put(order.getOrderID(), order);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return orders;
+    }
+
+    // Function to map a ResultSet to an Order object
+    private static Order mapResultSetToOrder(ResultSet resultSet) throws SQLException {
+        int orderID = resultSet.getInt("orderID");
+        int customerID = resultSet.getInt("customerID");
+        LocalDateTime timestamp = resultSet.getTimestamp("timestamp").toLocalDateTime();
+        double total = resultSet.getDouble("total");
+        int paymentID = resultSet.getInt("paymentID");
+        Order order = new Order(orderID, customerID, timestamp, total, paymentID);
+        // Fetch order products
+        fetchOrderProducts(order);
+        return order;
+    }
+
+    // Function to fetch order products from the database
+    private static void fetchOrderProducts(Order order) {
+        try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS);
+             PreparedStatement statement = connection.prepareStatement("SELECT * FROM orderproducts WHERE orderID = ?")) {
+            statement.setInt(1, order.getOrderID());
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                int productID = resultSet.getInt("productID");
+                int quantity = resultSet.getInt("quantity");
+                order.addProduct(productID, quantity);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Function to update an order in the database
+    public static void updateOrder(Order order) {
+        try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS);
+             PreparedStatement statement = connection.prepareStatement(UPDATE_ORDER_QUERY)) {
+            statement.setInt(1, order.getCustomerID());
+            statement.setTimestamp(2, Timestamp.valueOf(order.getTimestamp()));
+            statement.setDouble(3, order.getTotal());
+            statement.setInt(4, order.getPaymentID());
+            statement.setInt(5, order.getOrderID());
+            statement.executeUpdate();
+            // Delete existing order products
+            deleteOrderProducts(connection, order.getOrderID());
+            // Insert updated order products
+            insertOrderProducts(connection, order);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static double getTotal(Map<Integer, Integer> products) {
+        double total = 0;
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            for (Map.Entry<Integer, Integer> entry : products.entrySet()) {
+                int productID = entry.getKey();
+                int quantity = entry.getValue();
+                // Query the database to get the price of the product
+                String sql = "SELECT price FROM products WHERE productID = ?";
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    stmt.setInt(1, productID);
+                    try (ResultSet rs = stmt.executeQuery()) {
+                        if (rs.next()) {
+                            double price = rs.getDouble("price");
+                            total += price * quantity;
+                        } else {
+                            System.out.println("Product with ID " + productID + " not found.");
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to calculate total.");
+        }
+        return total;
+    }
+
+    // Function to delete an order from the database
+    public static void deleteOrder(int orderID) {
+        try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            // Delete order products
+            deleteOrderProducts(connection, orderID);
+            // Delete order
+            PreparedStatement statement = connection.prepareStatement(DELETE_ORDER_QUERY);
+            statement.setInt(1, orderID);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Function to delete order products associated with an order
+    private static void deleteOrderProducts(Connection connection, int orderID) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement(DELETE_ORDER_PRODUCTS_QUERY);
+        statement.setInt(1, orderID);
+        statement.executeUpdate();
     }
 
 }
