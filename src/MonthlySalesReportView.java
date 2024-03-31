@@ -2,6 +2,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -15,6 +18,7 @@ public class MonthlySalesReportView extends JFrame {
     private final JTextField endDateField;
     private final JCheckBox sortCheckBox;
     private final JCheckBox cutOffCheckBox;
+    private final JCheckBox saveCheckBox;
     private final JTextArea resultArea;
 
     public MonthlySalesReportView() {
@@ -23,7 +27,7 @@ public class MonthlySalesReportView extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(5, 2));
+        panel.setLayout(new GridLayout(6, 2));
 
         JLabel startDateLabel = new JLabel("Start Date (YYYY-MM-DD):");
         startDateField = new JTextField();
@@ -45,6 +49,11 @@ public class MonthlySalesReportView extends JFrame {
         panel.add(cutOffLabel);
         panel.add(cutOffCheckBox);
 
+        JLabel saveLabel = new JLabel("Save Report:");
+        saveCheckBox = new JCheckBox();
+        panel.add(saveLabel);
+        panel.add(saveCheckBox);
+
         JButton generateButton = new JButton("Generate Report");
         panel.add(generateButton);
 
@@ -61,6 +70,7 @@ public class MonthlySalesReportView extends JFrame {
                 LocalDate endDate = LocalDate.parse(endDateField.getText());
                 boolean sortDescending = sortCheckBox.isSelected();
                 boolean cutOff = cutOffCheckBox.isSelected();
+                boolean saveReport = saveCheckBox.isSelected();
 
                 Map<Month, Double> salesData = DataAccess.getTotalSalePerMonth(startDate, endDate);
 
@@ -72,6 +82,10 @@ public class MonthlySalesReportView extends JFrame {
                 }
 
                 displayResults(salesData);
+
+                if (saveReport) {
+                    saveReportToFile(salesData);
+                }
             }
         });
     }
@@ -119,6 +133,18 @@ public class MonthlySalesReportView extends JFrame {
         }
 
         return topMap;
+    }
+
+    private void saveReportToFile(Map<Month, Double> salesData) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("monthly_sales_report.txt"))) {
+            writer.write("---- Total Sales per Month from " + startDateField.getText() + " to " + endDateField.getText() + " ----\n");
+            for (Map.Entry<Month, Double> entry : salesData.entrySet()) {
+                writer.write(entry.getKey().getMonthName() + ": $" + entry.getValue() + "\n");
+            }
+            JOptionPane.showMessageDialog(this, "Report saved successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Error saving report: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void displayResults(Map<Month, Double> salesData) {
