@@ -193,12 +193,18 @@ public class OrderView extends JFrame {
                 updateButton.addActionListener(ae -> {
                     // Create order
                     Order updatedOrder = new Order(orderID, Integer.parseInt(customerIDField.getText()), order.getTimestamp(), 0, Integer.parseInt(paymentIDField.getText()));
+                    boolean someQuantity = false;
                     // Add or update products
                     for (Map.Entry<JTextField, JTextField> entry : productFields.entrySet()) {
                         int productID = Integer.parseInt(entry.getKey().getText());
                         int quantity = Integer.parseInt(entry.getValue().getText());
                         if(quantity > 0) {
                             updatedOrder.addProduct(productID, quantity);
+                            someQuantity = true;
+                        }
+                        if (!someQuantity) {
+                            DataAccess.deleteOrder(orderID);
+                            showOperationSelectionView();
                         }
                     }
                     // Update order in database
