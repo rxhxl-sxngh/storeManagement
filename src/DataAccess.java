@@ -617,8 +617,32 @@ public class DataAccess {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return totalSalePerMonth;
+    }
+
+    public static Map<Integer, Double> getTotalSalePerProduct(LocalDate startDate, LocalDate endDate) {
+        Map<Integer, Double> totalSalePerProduct = new HashMap<>();
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            String sql = "SELECT op.productID, SUM(o.total) AS total_sale " +
+                    "FROM orders o " +
+                    "JOIN orderproducts op ON o.orderID = op.orderID " +
+                    "WHERE o.timestamp BETWEEN ? AND ? " +
+                    "GROUP BY op.productID";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, startDate.toString());
+                stmt.setString(2, endDate.toString());
+                ResultSet rs = stmt.executeQuery();
+                while (rs.next()) {
+                    int productID = rs.getInt("productID");
+                    double totalSale = rs.getDouble("total_sale");
+                    totalSalePerProduct.put(productID, totalSale);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return totalSalePerProduct;
     }
 
 }
