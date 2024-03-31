@@ -301,4 +301,107 @@ public class DataAccess {
         }
     }
 
+    // Add a payment to the database
+    public static void addPayment(Payment payment) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            String sql = "INSERT INTO payments (paymentID, cardName, cardNumber, CVV, expDate) VALUES (?, ?, ?, ?, ?)";
+            try (PreparedStatement preparedStatement = conn.prepareStatement(sql)) {
+                preparedStatement.setInt(1, payment.getPaymentID());
+                preparedStatement.setString(2, payment.getCardName());
+                preparedStatement.setString(3, payment.getCardNumber());
+                preparedStatement.setString(4, payment.getCVV());
+                preparedStatement.setDate(5, payment.getExpDate());
+                preparedStatement.executeUpdate();
+                System.out.println("Payment added successfully.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to add payment.");
+        }
+    }
+
+    // Read a payment from the database by paymentID
+    public static Payment getPaymentByID(int paymentID) {
+        Payment payment = null;
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            String sql = "SELECT * FROM payments WHERE paymentID = ?";
+            try (PreparedStatement preparedStatement = conn.prepareStatement(sql)) {
+                preparedStatement.setInt(1, paymentID);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    payment = new Payment(
+                            resultSet.getInt("paymentID"),
+                            resultSet.getString("cardName"),
+                            resultSet.getString("cardNumber"),
+                            resultSet.getString("CVV"),
+                            resultSet.getDate("expDate")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to get payment.");
+        }
+        return payment;
+    }
+
+    // Get all payments from the database
+    public static List<Payment> getAllPayments() {
+        List<Payment> paymentList = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            String sql = "SELECT * FROM payments";
+            try (Statement statement = conn.createStatement();
+                 ResultSet resultSet = statement.executeQuery(sql)) {
+                while (resultSet.next()) {
+                    Payment payment = new Payment(
+                            resultSet.getInt("paymentID"),
+                            resultSet.getString("cardName"),
+                            resultSet.getString("cardNumber"),
+                            resultSet.getString("CVV"),
+                            resultSet.getDate("expDate")
+                    );
+                    paymentList.add(payment);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to get payments.");
+        }
+        return paymentList;
+    }
+
+    // Update a payment in the database
+    public static void updatePayment(Payment payment) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            String sql = "UPDATE payments SET cardName = ?, cardNumber = ?, CVV = ?, expDate = ? WHERE paymentID = ?";
+            try (PreparedStatement preparedStatement = conn.prepareStatement(sql)) {
+                preparedStatement.setString(1, payment.getCardName());
+                preparedStatement.setString(2, payment.getCardNumber());
+                preparedStatement.setString(3, payment.getCVV());
+                preparedStatement.setDate(4, payment.getExpDate());
+                preparedStatement.setInt(5, payment.getPaymentID());
+                preparedStatement.executeUpdate();
+                System.out.println("Payment updated successfully.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to update payment.");
+        }
+    }
+
+    // Delete a payment from the database by paymentID
+    public static void deletePayment(int paymentID) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            String sql = "DELETE FROM payments WHERE paymentID = ?";
+            try (PreparedStatement preparedStatement = conn.prepareStatement(sql)) {
+                preparedStatement.setInt(1, paymentID);
+                preparedStatement.executeUpdate();
+                System.out.println("Payment deleted successfully.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to delete payment.");
+        }
+    }
+
 }
