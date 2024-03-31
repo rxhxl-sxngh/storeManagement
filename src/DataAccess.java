@@ -509,6 +509,24 @@ public class DataAccess {
         }
     }
 
+    // Function to fetch order products by orderID from the database
+    public static Map<Integer, Integer> getOrderProductsByID(int orderID) {
+        Map<Integer, Integer> products = new HashMap<>();
+        try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS);
+             PreparedStatement statement = connection.prepareStatement("SELECT * FROM orderproducts WHERE orderID = ?")) {
+            statement.setInt(1, orderID);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                int productID = resultSet.getInt("productID");
+                int quantity = resultSet.getInt("quantity");
+                products.put(productID, quantity);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return products;
+    }
+
     // Function to update an order in the database
     public static void updateOrder(Order order) {
         try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS);

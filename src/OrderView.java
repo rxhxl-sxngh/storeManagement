@@ -8,10 +8,8 @@ public class OrderView extends JFrame {
 
     private final JComboBox<String> operationComboBox;
     private final JPanel panel = new JPanel();
-    private int extraRows = 0;
 
     public OrderView() {
-        extraRows = 0;
         setTitle("Order View");
         setSize(300, 200);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -42,9 +40,8 @@ public class OrderView extends JFrame {
 
     private void addOrder() {
         setSize(600, 400);
-        int rows = 6;
         panel.removeAll(); // Clear previous components
-        panel.setLayout(new GridLayout(rows, 2));
+        panel.setLayout(new GridLayout(0, 2));
 
         JLabel customerIDLabel = new JLabel("Customer ID:");
         JTextField customerIDField = new JTextField();
@@ -82,14 +79,11 @@ public class OrderView extends JFrame {
             JTextField newQuantityField = new JTextField();
             productFields.put(newProductIDField, newQuantityField);
             panel.remove(addProductButton);
-            extraRows += 2;
-            panel.setLayout(new GridLayout(rows + extraRows, 2));
             panel.add(new JLabel("Product ID:"));
             panel.add(newProductIDField);
             panel.add(new JLabel("Quantity:"));
             panel.add(newQuantityField);
             panel.add(addProductButton);
-//            panel.setLayout(new GridLayout(rows + extraRows, 2));
             revalidate();
             repaint();
         });
@@ -126,48 +120,100 @@ public class OrderView extends JFrame {
         panel.add(orderIDLabel);
         panel.add(orderIDField);
 
-        JButton addProductButton = new JButton("Add Product");
-        panel.add(addProductButton);
-
-        JButton updateButton = new JButton("Update Order");
-        panel.add(updateButton);
-
-        Map<JTextField, JTextField> productFields = new HashMap<>();
-
-        addProductButton.addActionListener(e -> {
-            JTextField productIDField = new JTextField();
-            JTextField quantityField = new JTextField();
-            productFields.put(productIDField, quantityField);
-            panel.add(new JLabel("Product ID:"));
-            panel.add(productIDField);
-            panel.add(new JLabel("Quantity:"));
-            panel.add(quantityField);
-            revalidate();
-            repaint();
-        });
-
-        updateButton.addActionListener(e -> {
-            // Get order ID
-            int orderID = Integer.parseInt(orderIDField.getText());
-            // Create order
-            Order order = DataAccess.getOrderByID(orderID);
-            if (order != null) {
-                // Add or update products
-                for (Map.Entry<JTextField, JTextField> entry : productFields.entrySet()) {
-                    int productID = Integer.parseInt(entry.getKey().getText());
-                    int quantity = Integer.parseInt(entry.getValue().getText());
-                    order.addProduct(productID, quantity);
-                }
-                // Update order in database
-                DataAccess.updateOrder(order);
-            }
-            // Show operation selection view
-            showOperationSelectionView();
-        });
+        JButton getOrderDetailsButton = new JButton("Get Order Details");
+        panel.add(getOrderDetailsButton);
 
         JButton backButton = new JButton("Go Back");
         backButton.addActionListener(e -> showOperationSelectionView());
         panel.add(backButton);
+
+        getOrderDetailsButton.addActionListener(e -> {
+            int orderID = Integer.parseInt(orderIDField.getText());
+            Order order = DataAccess.getOrderByID(orderID);
+            panel.removeAll(); // Clear previous components
+            panel.setLayout(new GridLayout(0, 2));
+            if (order != null) {
+                // Fill the text fields with order details
+                panel.add(orderIDLabel);
+                panel.add(orderIDField);
+
+                JLabel customerIDLabel = new JLabel("Customer ID:");
+                JTextField customerIDField = new JTextField();
+                panel.add(customerIDLabel);
+                panel.add(customerIDField);
+
+                JLabel paymentIDLabel = new JLabel("Payment ID:");
+                JTextField paymentIDField = new JTextField();
+                panel.add(paymentIDLabel);
+                panel.add(paymentIDField);
+
+                JButton updateButton = new JButton("Update Order");
+                panel.add(updateButton);
+
+                panel.add(backButton);
+
+                orderIDField.setText(String.valueOf(orderID));
+                orderIDField.setEditable(false);
+                customerIDField.setText(String.valueOf(order.getCustomerID()));
+                paymentIDField.setText(String.valueOf(order.getPaymentID()));
+
+                // Get products for the order from the database
+                Map<Integer, Integer> products = DataAccess.getOrderProductsByID(orderID);
+
+                // Create product fields dynamically based on the retrieved products
+                Map<JTextField, JTextField> productFields = new HashMap<>();
+                for (Map.Entry<Integer, Integer> entry : products.entrySet()) {
+                    JTextField productIDField = new JTextField(String.valueOf(entry.getKey()));
+                    JTextField quantityField = new JTextField(String.valueOf(entry.getValue()));
+                    productFields.put(productIDField, quantityField);
+                    panel.add(new JLabel("Product ID:"));
+                    panel.add(productIDField);
+                    panel.add(new JLabel("Quantity:"));
+                    panel.add(quantityField);
+                }
+
+                // Add a button to dynamically add more products
+                JButton addProductButton = new JButton("Add Product");
+                panel.add(addProductButton);
+
+                addProductButton.addActionListener(ae -> {
+                    JTextField newProductIDField = new JTextField();
+                    JTextField newQuantityField = new JTextField();
+                    productFields.put(newProductIDField, newQuantityField);
+                    panel.remove(addProductButton);
+                    panel.add(new JLabel("Product ID:"));
+                    panel.add(newProductIDField);
+                    panel.add(new JLabel("Quantity:"));
+                    panel.add(newQuantityField);
+                    panel.add(addProductButton);
+                    revalidate();
+                    repaint();
+                });
+
+                updateButton.addActionListener(ae -> {
+                    // Create order
+                    Order updatedOrder = new Order(orderID, Integer.parseInt(customerIDField.getText()), order.getTimestamp(), 0, Integer.parseInt(paymentIDField.getText()));
+                    // Add or update products
+                    for (Map.Entry<JTextField, JTextField> entry : productFields.entrySet()) {
+                        int productID = Integer.parseInt(entry.getKey().getText());
+                        int quantity = Integer.parseInt(entry.getValue().getText());
+                        if(quantity > 0) {
+                            updatedOrder.addProduct(productID, quantity);
+                        }
+                    }
+                    // Update order in database
+                    updateTotal(updatedOrder);
+                    DataAccess.updateOrder(updatedOrder);
+                    // Show operation selection view
+                    showOperationSelectionView();
+                });
+
+                revalidate(); // Refresh the layout
+                repaint(); // Repaint the component
+            } else {
+                JOptionPane.showMessageDialog(this, "Order ID not found.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
 
         revalidate(); // Refresh the layout
         repaint(); // Repaint the component
