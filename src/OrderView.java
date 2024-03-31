@@ -3,6 +3,8 @@ import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+
 
 public class OrderView extends JFrame {
 
@@ -17,7 +19,7 @@ public class OrderView extends JFrame {
         panel.setLayout(new GridLayout(4, 2));
 
         JLabel operationLabel = new JLabel("Select Operation:");
-        String[] operations = {"Add Order", "Update Order"};
+        String[] operations = {"Show Orders", "Add Order", "Update Order", "Delete Order"};
         operationComboBox = new JComboBox<>(operations);
         panel.add(operationLabel);
         panel.add(operationComboBox);
@@ -26,16 +28,59 @@ public class OrderView extends JFrame {
             String selectedOperation = (String) operationComboBox.getSelectedItem();
             assert selectedOperation != null;
             switch (selectedOperation) {
+                case "Show Orders":
+                    showOrders();
+                    break;
                 case "Add Order":
                     addOrder();
                     break;
                 case "Update Order":
                     updateOrder();
                     break;
+                case "Delete Order":
+                    deleteOrder();
+                    break;
             }
         });
 
         add(panel);
+    }
+
+    private void showOrders() {
+        panel.removeAll();
+        panel.setLayout(new GridLayout(0, 1));
+        setSize(800, 800); // Adjust the frame size to accommodate larger text area
+
+        JTextArea ordersTextArea = new JTextArea();
+        ordersTextArea.setFont(new Font("Arial", Font.PLAIN, 16)); // Increase font size for better readability
+
+        JScrollPane scrollPane = new JScrollPane(ordersTextArea);
+        panel.add(scrollPane, BorderLayout.CENTER); // Set scroll pane to occupy most of the window
+
+        JButton backButton = new JButton("Go Back");
+        backButton.addActionListener(e -> showOperationSelectionView());
+
+        // Create a separate panel for the Go Back button
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT)); // Align button to the right
+        buttonPanel.add(backButton);
+
+        // Add button panel to the bottom of the frame
+        panel.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Fetch all orders from the database
+        Map<Integer, Order> orderMap = DataAccess.getAllOrders();
+        if (orderMap.isEmpty()) {
+            ordersTextArea.setText("No orders found.");
+        } else {
+            // Display each order's information using its toString method
+            for (Order order : orderMap.values()) {
+                ordersTextArea.append(order.toString() + "\n\n");
+            }
+        }
+
+        revalidate();
+        repaint();
     }
 
     private void addOrder() {
@@ -223,6 +268,36 @@ public class OrderView extends JFrame {
 
         revalidate(); // Refresh the layout
         repaint(); // Repaint the component
+    }
+
+    private void deleteOrder() {
+        panel.removeAll();
+        panel.setLayout(new GridLayout(2, 2));
+
+        JLabel orderIDLabel = new JLabel("Order ID:");
+        JTextField orderIDField = new JTextField();
+        panel.add(orderIDLabel);
+        panel.add(orderIDField);
+
+        JButton deleteButton = new JButton("Delete Order");
+        panel.add(deleteButton);
+
+        JButton backButton = new JButton("Go Back");
+        backButton.addActionListener(e -> showOperationSelectionView());
+        panel.add(backButton);
+
+        deleteButton.addActionListener(e -> {
+            int orderID = Integer.parseInt(orderIDField.getText());
+            int result = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete order " + orderID + "?", "Confirmation", JOptionPane.YES_NO_OPTION);
+            if (result == JOptionPane.YES_OPTION) {
+                DataAccess.deleteOrder(orderID);
+                JOptionPane.showMessageDialog(this, "Order deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                showOperationSelectionView();
+            }
+        });
+
+        revalidate();
+        repaint();
     }
 
     public void updateTotal(Order order) {

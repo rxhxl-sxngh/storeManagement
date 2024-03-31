@@ -79,5 +79,31 @@ public class Order {
     public void removeProduct(int productID) {
         products.remove(productID);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("Order{")
+                .append("orderID=").append(orderID)
+                .append(", customerID=").append(customerID)
+                .append(", timestamp=").append(timestamp)
+                .append(", total=").append(total)
+                .append(", paymentID=").append(paymentID)
+                .append(", products=[");
+
+        for (Map.Entry<Integer, Integer> entry : products.entrySet()) {
+            stringBuilder.append("(ProductID=").append(entry.getKey())
+                    .append(", Quantity=").append(entry.getValue())
+                    .append("), ");
+        }
+
+        // Remove the last ", " if there are products
+        if (!products.isEmpty()) {
+            stringBuilder.delete(stringBuilder.length() - 2, stringBuilder.length());
+        }
+
+        stringBuilder.append("]}");
+        return stringBuilder.toString();
+    }
 }
 
