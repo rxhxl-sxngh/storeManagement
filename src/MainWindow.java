@@ -34,6 +34,15 @@ public class MainWindow extends JFrame {
                 supplierView.setVisible(true);
             }
         });
+
+        JButton openProductViewButton = new JButton("Open Product View");
+        openProductViewButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ProductView productView = new ProductView(); // Open Employee View
+                productView.setVisible(true);
+            }
+        });
 //
 //        JButton openProjectViewButton = new JButton("Open Project View");
 //        openProjectViewButton.addActionListener(new ActionListener() {
@@ -56,6 +65,7 @@ public class MainWindow extends JFrame {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER)); // Panel to hold buttons
         buttonPanel.add(openCustomerViewButton);
         buttonPanel.add(openSupplierViewButton);
+        buttonPanel.add(openProductViewButton);
 //        buttonPanel.add(openProjectViewButton);
         panel.add(buttonPanel, BorderLayout.CENTER); // Add the buttons below the title
 

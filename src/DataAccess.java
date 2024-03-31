@@ -198,4 +198,107 @@ public class DataAccess {
         }
     }
 
+    // Add a product to the database
+    public static void addProduct(Product product) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            String sql = "INSERT INTO products (productID, productName, stock, price, supplierID) VALUES (?, ?, ?, ?, ?)";
+            try (PreparedStatement preparedStatement = conn.prepareStatement(sql)) {
+                preparedStatement.setInt(1, product.getProductID());
+                preparedStatement.setString(2, product.getProductName());
+                preparedStatement.setInt(3, product.getStock());
+                preparedStatement.setDouble(4, product.getPrice());
+                preparedStatement.setInt(5, product.getSupplierID());
+                preparedStatement.executeUpdate();
+                System.out.println("Product added successfully.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to add product.");
+        }
+    }
+
+    // Get a product from the database by productID
+    public static Product getProductByID(int productID) {
+        Product product = null;
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            String sql = "SELECT * FROM products WHERE productID = ?";
+            try (PreparedStatement preparedStatement = conn.prepareStatement(sql)) {
+                preparedStatement.setInt(1, productID);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    product = new Product(
+                            resultSet.getInt("productID"),
+                            resultSet.getString("productName"),
+                            resultSet.getInt("stock"),
+                            resultSet.getDouble("price"),
+                            resultSet.getInt("supplierID")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to get product.");
+        }
+        return product;
+    }
+
+    // Get all products from the database
+    public static List<Product> getAllProducts() {
+        List<Product> products = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            String sql = "SELECT * FROM products";
+            try (PreparedStatement preparedStatement = conn.prepareStatement(sql)) {
+                ResultSet resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()) {
+                    Product product = new Product(
+                            resultSet.getInt("productID"),
+                            resultSet.getString("productName"),
+                            resultSet.getInt("stock"),
+                            resultSet.getDouble("price"),
+                            resultSet.getInt("supplierID")
+                    );
+                    products.add(product);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to get all products.");
+        }
+        return products;
+    }
+
+    // Update a product in the database
+    public static void updateProduct(Product product) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            String sql = "UPDATE products SET productName = ?, stock = ?, price = ?, supplierID = ? WHERE productID = ?";
+            try (PreparedStatement preparedStatement = conn.prepareStatement(sql)) {
+                preparedStatement.setString(1, product.getProductName());
+                preparedStatement.setInt(2, product.getStock());
+                preparedStatement.setDouble(3, product.getPrice());
+                preparedStatement.setInt(4, product.getSupplierID());
+                preparedStatement.setInt(5, product.getProductID());
+                preparedStatement.executeUpdate();
+                System.out.println("Product updated successfully.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to update product.");
+        }
+    }
+
+    // Delete a product from the database by productID
+    public static void deleteProduct(int productID) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            String sql = "DELETE FROM products WHERE productID = ?";
+            try (PreparedStatement preparedStatement = conn.prepareStatement(sql)) {
+                preparedStatement.setInt(1, productID);
+                preparedStatement.executeUpdate();
+                System.out.println("Product deleted successfully.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to delete product.");
+        }
+    }
+
 }
