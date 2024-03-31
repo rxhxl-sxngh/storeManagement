@@ -645,4 +645,28 @@ public class DataAccess {
         return totalSalePerProduct;
     }
 
+    public static Map<Integer, Double> getTotalSalePerCustomer(LocalDate startDate, LocalDate endDate) {
+        Map<Integer, Double> totalSalePerCustomer = new HashMap<>();
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            String sql = "SELECT customerID, SUM(total) AS total_sale " +
+                    "FROM orders " +
+                    "WHERE timestamp BETWEEN ? AND ? " +
+                    "GROUP BY customerID";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setDate(1, Date.valueOf(startDate));
+                stmt.setDate(2, Date.valueOf(endDate));
+                ResultSet rs = stmt.executeQuery();
+                while (rs.next()) {
+                    int customerID = rs.getInt("customerID");
+                    double totalSale = rs.getDouble("total_sale");
+                    totalSalePerCustomer.put(customerID, totalSale);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return totalSalePerCustomer;
+    }
+
 }

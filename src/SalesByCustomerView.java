@@ -7,13 +7,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
-public class SalesByProductView extends JFrame {
+public class SalesByCustomerView extends JFrame {
     private final JTextField startDateField;
     private final JTextField endDateField;
     private final JCheckBox sortCheckBox;
@@ -21,8 +20,8 @@ public class SalesByProductView extends JFrame {
     private final JCheckBox saveCheckBox;
     private final JTextArea resultArea;
 
-    public SalesByProductView() {
-        setTitle("Sales By Product");
+    public SalesByCustomerView() {
+        setTitle("Sales By Customer");
         setSize(650, 750);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -44,7 +43,7 @@ public class SalesByProductView extends JFrame {
         panel.add(sortLabel);
         panel.add(sortCheckBox);
 
-        JLabel cutOffLabel = new JLabel("Cut Off (Display Top 5):");
+        JLabel cutOffLabel = new JLabel("Cut Off (Display Top 3):");
         cutOffCheckBox = new JCheckBox();
         panel.add(cutOffLabel);
         panel.add(cutOffCheckBox);
@@ -72,7 +71,7 @@ public class SalesByProductView extends JFrame {
                 boolean cutOff = cutOffCheckBox.isSelected();
                 boolean saveReport = saveCheckBox.isSelected();
 
-                Map<Integer, Double> salesData = DataAccess.getTotalSalePerProduct(startDate, endDate);
+                Map<Integer, Double> salesData = DataAccess.getTotalSalePerCustomer(startDate, endDate);
 
                 if (sortDescending) {
                     salesData = sortDescending(salesData);
@@ -124,7 +123,7 @@ public class SalesByProductView extends JFrame {
         });
 
         // Keep only top 5 entries
-        ArrayList<Map.Entry<Integer, Double>> topEntries = new ArrayList<>(entryList.subList(0, Math.min(entryList.size(), 5)));
+        ArrayList<Map.Entry<Integer, Double>> topEntries = new ArrayList<>(entryList.subList(0, Math.min(entryList.size(), 3)));
 
         // Convert the top entries list back to a map
         Map<Integer, Double> topMap = new LinkedHashMap<>();
@@ -136,11 +135,11 @@ public class SalesByProductView extends JFrame {
     }
 
     private void saveReportToFile(Map<Integer, Double> salesData) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("sales_by_product_report.txt"))) {
-            writer.write("---- Total Sales per Product from " + startDateField.getText() + " to " + endDateField.getText() + " ----\n");
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("sales_by_customer_report.txt"))) {
+            writer.write("---- Total Sales per Customer from " + startDateField.getText() + " to " + endDateField.getText() + " ----\n");
             for (Map.Entry<Integer, Double> entry : salesData.entrySet()) {
-                Product product = DataAccess.getProductByID(entry.getKey());
-                writer.write(product.getProductName() + " with Product ID: " + entry.getKey() + ", Total Sales: $" + entry.getValue() + "\n");
+                Customer customer = DataAccess.getCustomerByID(entry.getKey());
+                writer.write(customer.getCustomerName() + " with Customer ID: " + entry.getKey() + ", Total Sales: $" + entry.getValue() + "\n");
             }
             JOptionPane.showMessageDialog(this, "Report saved successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
         } catch (IOException e) {
@@ -151,8 +150,8 @@ public class SalesByProductView extends JFrame {
     private void displayResults(Map<Integer, Double> salesData) {
         resultArea.setText("");
         for (Map.Entry<Integer, Double> entry : salesData.entrySet()) {
-            Product product = DataAccess.getProductByID(entry.getKey());
-            resultArea.append(product.getProductName() + " with Product ID: " + entry.getKey() + ", Total Sales: $" + entry.getValue() + "\n");
+            Customer customer = DataAccess.getCustomerByID(entry.getKey());
+            resultArea.append(customer.getCustomerName() + " with Customer ID: " + entry.getKey() + ", Total Sales: $" + entry.getValue() + "\n");
         }
     }
 
@@ -161,7 +160,7 @@ public class SalesByProductView extends JFrame {
             @Override
             public void run() {
                 try {
-                    new SalesByProductView().setVisible(true);
+                    new SalesByCustomerView().setVisible(true);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
