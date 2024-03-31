@@ -7,7 +7,7 @@ import java.sql.SQLException;
 public class MainWindow extends JFrame {
 
     public MainWindow() {
-        setTitle("Main Window");
+        setTitle("Store Management System");
         setSize(1000, 500);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -64,13 +64,13 @@ public class MainWindow extends JFrame {
 
         // Buttons to open different views
         JButton openMonthlySalesReportButton = new JButton("Monthly Sales Report");
-//        openMonthlySalesReportButton.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                CustomerView customerView = new CustomerView(); // Open Customer View
-//                customerView.setVisible(true);
-//            }
-//        });
+        openMonthlySalesReportButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                MonthlySalesReportView monthlySalesReportView = new MonthlySalesReportView(); // Open Customer View
+                monthlySalesReportView.setVisible(true);
+            }
+        });
 
         JButton openSalesByProductButton = new JButton("Sales by Product");
 

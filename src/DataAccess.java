@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public class DataAccess {
     static final String DB_URL = "jdbc:mysql://localhost:3306/store";
@@ -592,6 +593,32 @@ public class DataAccess {
         PreparedStatement statement = connection.prepareStatement(DELETE_ORDER_PRODUCTS_QUERY);
         statement.setInt(1, orderID);
         statement.executeUpdate();
+    }
+
+    public static Map<Month, Double> getTotalSalePerMonth(LocalDate startDate, LocalDate endDate) {
+        Map<Month, Double> totalSalePerMonth = new HashMap<>();
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            String sql = "SELECT MONTH(timestamp) AS month, SUM(total) AS total_sale " +
+                    "FROM orders " +
+                    "WHERE timestamp BETWEEN ? AND ? " +
+                    "GROUP BY MONTH(timestamp)";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, startDate.toString());
+                stmt.setString(2, endDate.toString());
+                ResultSet rs = stmt.executeQuery();
+                while (rs.next()) {
+                    int monthValue = rs.getInt("month");
+                    Month month = new Month(monthValue);
+                    double totalSale = rs.getDouble("total_sale");
+                    totalSalePerMonth.put(month, totalSale);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return totalSalePerMonth;
     }
 
 }
