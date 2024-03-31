@@ -61,20 +61,21 @@ public class MainWindow extends JFrame {
                 orderView.setVisible(true);
             }
         });
-//
-//        JButton openProjectViewButton = new JButton("Open Project View");
-//        openProjectViewButton.addActionListener(new ActionListener() {
+
+        // Buttons to open different views
+        JButton openMonthlySalesReportButton = new JButton("Monthly Sales Report");
+//        openMonthlySalesReportButton.addActionListener(new ActionListener() {
 //            @Override
 //            public void actionPerformed(ActionEvent e) {
-//                ProjectView projectView = null;
-//                try {
-//                    projectView = new ProjectView(); // Open Project View
-//                    projectView.setVisible(true);
-//                } catch (SQLException ex) {
-//                    ex.printStackTrace();
-//                }
+//                CustomerView customerView = new CustomerView(); // Open Customer View
+//                customerView.setVisible(true);
 //            }
 //        });
+
+        JButton openSalesByProductButton = new JButton("Sales by Product");
+
+
+        JButton openSalesByCustomerButton = new JButton("Sales by Customer");
 
         // Panel to hold the title and buttons
         JPanel panel = new JPanel();
@@ -86,8 +87,20 @@ public class MainWindow extends JFrame {
         buttonPanel.add(openProductViewButton);
         buttonPanel.add(openPaymentViewButton);
         buttonPanel.add(openOrderViewButton);
-//        buttonPanel.add(openProjectViewButton);
         panel.add(buttonPanel, BorderLayout.CENTER); // Add the buttons below the title
+
+        // Panel to hold the sales reports title and buttons
+        JPanel salesPanel = new JPanel(new BorderLayout());
+        JLabel salesReportsTitleLabel = new JLabel("Sales Reports");
+        salesReportsTitleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        salesReportsTitleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        salesPanel.add(salesReportsTitleLabel, BorderLayout.NORTH);
+        JPanel salesButtonPanel = new JPanel(new FlowLayout());
+        salesButtonPanel.add(openMonthlySalesReportButton);
+        salesButtonPanel.add(openSalesByProductButton);
+        salesButtonPanel.add(openSalesByCustomerButton);
+        salesPanel.add(salesButtonPanel, BorderLayout.CENTER);
+        panel.add(salesPanel, BorderLayout.SOUTH); // add the sales reports title and buttons
 
         add(panel);
     }
