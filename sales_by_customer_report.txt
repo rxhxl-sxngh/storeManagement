@@ -1,6 +1,0 @@
----- Total Sales per Customer from 2023-01-01 to 2024-03-31 ----
-Customer ID: 3, Total Sales: $623.52
-Customer ID: 1, Total Sales: $548.04
-Customer ID: 4, Total Sales: $503.54
-Customer ID: 5, Total Sales: $498.55
-Customer ID: 2, Total Sales: $434.54

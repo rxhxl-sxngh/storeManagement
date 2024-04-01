@@ -24,7 +24,7 @@ public class MonthlySalesReportView extends JFrame {
     public MonthlySalesReportView() {
         setTitle("Monthly Sales Report");
         setSize(450, 750);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(6, 2));

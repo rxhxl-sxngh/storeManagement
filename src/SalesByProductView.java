@@ -24,7 +24,7 @@ public class SalesByProductView extends JFrame {
     public SalesByProductView() {
         setTitle("Sales By Product");
         setSize(650, 750);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(6, 2));

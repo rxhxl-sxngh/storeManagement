@@ -73,9 +73,22 @@ public class MainWindow extends JFrame {
         });
 
         JButton openSalesByProductButton = new JButton("Sales by Product");
-
+        openSalesByProductButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                SalesByProductView salesByProductView = new SalesByProductView(); // Open Customer View
+                salesByProductView.setVisible(true);
+            }
+        });
 
         JButton openSalesByCustomerButton = new JButton("Sales by Customer");
+        openSalesByCustomerButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                SalesByCustomerView salesByCustomerView = new SalesByCustomerView(); // Open Customer View
+                salesByCustomerView.setVisible(true);
+            }
+        });
 
         // Panel to hold the title and buttons
         JPanel panel = new JPanel();
