@@ -433,6 +433,7 @@ public class DataAccess {
                 // Insert order products
                 insertOrderProducts(connection, order);
             }
+            System.out.println("Order added successfully.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -461,6 +462,7 @@ public class DataAccess {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            System.out.println("Failed to get order.");
         }
         return null;
     }
@@ -542,6 +544,7 @@ public class DataAccess {
             deleteOrderProducts(connection, order.getOrderID());
             // Insert updated order products
             insertOrderProducts(connection, order);
+            System.out.println("Order updated successfully.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -583,6 +586,7 @@ public class DataAccess {
             PreparedStatement statement = connection.prepareStatement(DELETE_ORDER_QUERY);
             statement.setInt(1, orderID);
             statement.executeUpdate();
+            System.out.println("Order deleted successfully.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
